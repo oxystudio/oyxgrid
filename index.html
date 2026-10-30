@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OXYgrid.</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#000;--card:#0d0d0d;--line:#222;--tx:#f2f2f2;--mut:#8a8a8a;--acc:#b5b5b5}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"Helvetica Neue",Arial,sans-serif}
+.w{max-width:680px;margin:0 auto;padding:28px 18px 60px}
+h1{font:400 40px/1 Georgia,"Times New Roman",serif;margin:0;letter-spacing:.5px}
+.sub{color:var(--mut);font-size:12px;margin:8px 0 22px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px}
+.chip{border:1px solid var(--line);background:none;color:var(--acc);padding:7px 14px;border-radius:99px;font-size:13px;white-space:nowrap;cursor:pointer}
+.chip.on{background:var(--tx);color:#000;border-color:var(--tx)}
+.mo{color:var(--mut);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:26px 0 10px}
+.ev{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.tag{font-size:11px;color:var(--acc);border:1px solid var(--line);padding:2px 8px;border-radius:99px;white-space:nowrap}
+.nm{font-size:17px;font-weight:600}
+.pl{color:var(--mut);font-size:13px;margin-top:2px}
+.ss{margin-top:12px;border-top:1px solid var(--line)}
+.s{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #151515;font-size:14px}
+.s:last-child{border-bottom:0}
+.s span:last-child{color:var(--acc);text-align:right;font-variant-numeric:tabular-nums}
+.tbc{color:var(--mut)!important}
+.nt{color:var(--mut);font-size:12px;margin-top:10px}
+.emp{color:var(--mut);text-align:center;padding:40px 0}
+.ft{color:var(--mut);font-size:11px;margin-top:34px;text-align:center}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>OXYgrid.</h1>
+<div class="sub" id="sub"></div>
+<div class="chips" id="chips"></div>
+<div id="list"></div>
+<div class="ft">Время показано в вашем часовом поясе. «Уточняется» — организаторы ещё не опубликовали расписание.</div>
+</div>
+<script>
+var UPDATED="2026-10-30";
+var CATS={all:"Все",f:"Формулы",gt:"GT / Endurance",fp:"Ferrari / Porsche"};
+var E=[
+{n:"Гран-при Мехико",c:"f",tag:"Формула 1",p:"Autódromo Hermanos Rodríguez, Мексика",a:"2026-10-30",b:"2026-11-01",s:[
+["Свободная практика 1","2026-10-30T18:30Z"],["Свободная практика 2","2026-10-30T22:00Z"],["Свободная практика 3","2026-10-31T17:30Z"],["Квалификация","2026-10-31T21:00Z"],["F1 Academy · гонка 3 (по эфиру Sky)","2026-11-01T17:00Z"],["Гонка","2026-11-01T20:00Z"]],
+note:"Спринта нет. Раунд 19 из 23."},
+{n:"GT World Challenge Asia — финал",c:"gt",tag:"GT3",p:"Шанхай, Китай",a:"2026-10-31",b:"2026-11-01",s:[["Две гонки, решающие судьбу титула",null]]},
+{n:"Porsche Carrera Cup Italia",c:"fp",tag:"Porsche Cup",p:"Муджелло, Италия · раунд 6",a:"2026-10-30",b:"2026-11-01",s:[["Квалификация и гонки",null]]},
+{n:"TSS The Super Series",c:"gt",tag:"GT3 / GT Cup",p:"Чанг, Бурирам, Таиланд · раунд 4",a:"2026-10-31",b:"2026-11-01",s:[["Квалификация и гонки",null]]},
+{n:"GT4 Australia",c:"gt",tag:"GT4",p:"Сандаун, Австралия · раунд 6",a:"2026-10-30",b:"2026-11-01",s:[["Квалификация и гонки",null]]},
+{n:"Гран-при Сан-Паулу",c:"f",tag:"Формула 1",p:"Интерлагос, Бразилия",a:"2026-11-06",b:"2026-11-08",s:[
+["Свободная практика 1","2026-11-06T15:30Z"],["Свободная практика 2","2026-11-06T19:00Z"],["Свободная практика 3","2026-11-07T14:30Z"],["Квалификация","2026-11-07T18:00Z"],["Гонка","2026-11-08T17:00Z"]],
+note:"Спринта нет. Раунд 20 из 23."},
+{n:"6 часов Монцы",c:"gt",tag:"WEC · финал",p:"Монца, Италия",a:"2026-11-06",b:"2026-11-08",s:[
+["Свободная практика 1","2026-11-06T09:30Z"],["Свободная практика 2","2026-11-06T13:30Z"],["Свободная практика 3","2026-11-07T09:30Z"],["Квалификация LMGT3","2026-11-07T13:20Z"],["Гиперпоул LMGT3","2026-11-07T13:40Z"],["Квалификация Hypercar","2026-11-07T14:00Z"],["Гиперпоул Hypercar","2026-11-07T14:20Z"],["Гонка (6 часов)","2026-11-08T10:00Z"]],
+note:"Заменил отменённый финал в Бахрейне."},
+{n:"Finali Mondiali",c:"fp",tag:"Ferrari Challenge",p:"Барселона-Каталунья, Испания",a:"2026-11-17",b:"2026-11-22",s:[["Квалификации и гонки Europe / North America",null]],
+note:"Финал сезона Ferrari Challenge. Даты у источников: 17–22 или 23 ноября."},
+{n:"Гран-при Лас-Вегаса",c:"f",tag:"Формула 1",p:"Лас-Вегас, США",a:"2026-11-19",b:"2026-11-21",s:[
+["Свободная практика 1","2026-11-20T00:30Z"],["Свободная практика 2","2026-11-20T04:00Z"],["Свободная практика 3","2026-11-21T00:30Z"],["Квалификация","2026-11-21T04:00Z"],["Гонка","2026-11-22T04:00Z"]],
+note:"Раунд 21 из 23. Гонка в субботу вечером по местному времени (20:00)."},
+{n:"Macau GP / FIA GT World Cup",c:"gt",tag:"GT3 · FR · F4 · TCR",p:"Гиа, Макао",a:"2026-11-19",b:"2026-11-22",s:[["FIA GT World Cup и другие кубки",null]],note:"Сессии начинаются 19 ноября, подробное расписание ещё не опубликовано."},
+{n:"Гран-при Катара",c:"f",tag:"Формула 1",p:"Лусаил, Катар",a:"2026-11-27",b:"2026-11-29",s:[
+["Свободная практика 1","2026-11-27T13:30Z"],["Свободная практика 2","2026-11-27T17:00Z"],["Свободная практика 3","2026-11-28T14:30Z"],["Квалификация","2026-11-28T18:00Z"],["Гонка","2026-11-29T16:00Z"]],note:"Раунд 22 из 23."},
+{n:"Гран-при Абу-Даби",c:"f",tag:"Формула 1",p:"Яс-Марина, ОАЭ",a:"2026-12-04",b:"2026-12-06",s:[
+["Свободная практика 1","2026-12-04T09:30Z"],["Свободная практика 2","2026-12-04T13:00Z"],["Свободная практика 3","2026-12-05T10:30Z"],["Квалификация","2026-12-05T14:00Z"],["Гонка","2026-12-06T13:00Z"]],note:"Финал сезона, раунд 23 из 23."}
+];
+var cur="all";
+var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
+function fmt(t){var d=new Date(t);return d.toLocaleDateString("ru-RU",{weekday:"short",day:"numeric",month:"short"})+" · "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}
+function rng(a,b){var o={day:"numeric",month:"long"},x=new Date(a+"T12:00:00"),y=new Date(b+"T12:00:00");
+return a===b?x.toLocaleDateString("ru-RU",o):x.getDate()+"–"+y.toLocaleDateString("ru-RU",o)}
+function render(){
+var h="",last="",today=new Date().toISOString().slice(0,10),n=0;
+E.filter(function(e){return e.b>=today&&(cur==="all"||e.c===cur)}).sort(function(x,y){return x.a<y.a?-1:1}).forEach(function(e){
+n++;var m=new Date(e.a+"T12:00:00").toLocaleDateString("ru-RU",{month:"long",year:"numeric"});
+if(m!==last){h+='<div class="mo">'+m+'</div>';last=m}
+h+='<div class="ev"><div class="top"><div><div class="nm">'+e.n+'</div><div class="pl">'+e.p+' · '+rng(e.a,e.b)+'</div></div><span class="tag">'+e.tag+'</span></div><div class="ss">';
+e.s.forEach(function(s){h+='<div class="s"><span>'+s[0]+'</span><span'+(s[1]?'':' class="tbc"')+'>'+(s[1]?fmt(s[1]):'время уточняется')+'</span></div>'});
+h+='</div>'+(e.note?'<div class="nt">'+e.note+'</div>':'')+'</div>'});
+document.getElementById("list").innerHTML=n?h:'<div class="emp">Нет событий в этой категории</div>';
+document.getElementById("chips").innerHTML=Object.keys(CATS).map(function(k){return '<button class="chip'+(k===cur?' on':'')+'" data-k="'+k+'">'+CATS[k]+'</button>'}).join("");
+}
+document.getElementById("chips").addEventListener("click",function(ev){var k=ev.target.getAttribute("data-k");if(k){cur=k;render()}});
+document.getElementById("sub").textContent="Расписание гонок · обновлено "+new Date(UPDATED+"T12:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})+(tz?" · "+tz:"");
+render();
+</script>
+</body>
+</html>
